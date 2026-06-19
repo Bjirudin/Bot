@@ -9,11 +9,12 @@ const CONFIG = {
 }
 
 const RECONNECT_DELAY_MS = 5000
-const MOVE_INTERVAL_MS = 25000
+const MOVE_INTERVAL_MS = 30000
 let client = null
 let moveTimer = null
 let reconnectTimer = null
 let isConnected = false
+let menit = 0
 
 function log(msg) {
   const now = new Date().toLocaleString('id-ID', { timeZone: 'Asia/Jakarta' })
@@ -25,19 +26,11 @@ function stopMovement() {
 }
 
 function startAntiAFK() {
-  stopMovement()
-  let step = 0
+  stopMovement(); menit = 0
   moveTimer = setInterval(() => {
     if (!client || !isConnected) return
-    step++
-    try {
-      client.write('player_action', {
-        runtime_id: BigInt(1), action: 0,
-        position: { x: 0, y: 0, z: 0 },
-        result_position: { x: 0, y: 0, z: 0 }, face: 0,
-      })
-      log(`Anti-AFK: langkah ke-${step}`)
-    } catch (err) { log(`Anti-AFK error: ${err.message}`) }
+    menit++
+    log(`✅ Bot aktif di server — sudah ${menit} menit`)
   }, MOVE_INTERVAL_MS)
 }
 
@@ -50,12 +43,13 @@ function connect() {
   client.on('spawn', () => {
     isConnected = true
     log('✅ Bot berhasil masuk ke server!')
+    log('🔄 Server Aternos tidak akan tutup selama bot online')
     startAntiAFK()
   })
-  client.on('text', (p) => log(`💬 ${p.message || ''}`))
+  client.on('text', (p) => log(`💬 Chat: ${p.message || ''}`))
   client.on('disconnect', (r) => {
     isConnected = false; stopMovement()
-    log(`⚠️ Disconnect: ${JSON.stringify(r)}`); scheduleReconnect()
+    log(`⚠️ Terputus: ${JSON.stringify(r)}`); scheduleReconnect()
   })
   client.on('error', (err) => {
     isConnected = false; stopMovement()
@@ -63,7 +57,7 @@ function connect() {
   })
   client.on('close', () => {
     isConnected = false; stopMovement()
-    log('🔌 Tutup'); scheduleReconnect()
+    log('🔌 Koneksi ditutup'); scheduleReconnect()
   })
 }
 
@@ -75,6 +69,8 @@ function scheduleReconnect() {
 
 process.on('SIGINT', () => { stopMovement(); if (client) client.close(); process.exit(0) })
 process.on('uncaughtException', (err) => { log(`Exception: ${err.message}`); scheduleReconnect() })
+process.on('unhandledRejection', (r) => { log(`Rejection: ${r}`) })
 
-log('=== Bot Chacha Ninggolan | versi 1.26.20 ===')
+log('=== Bot Chacha Ninggolan ===')
+log(`Server: ${CONFIG.host}:${CONFIG.port} | Versi: ${CONFIG.version}`)
 connect()
