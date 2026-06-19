@@ -5,6 +5,7 @@ const CONFIG = {
   port: 19148,
   username: 'Chacha ninggolan',
   offline: false,
+    version: '1.26.20',
 }
 
 const RECONNECT_DELAY_MS = 5000
