@@ -5,12 +5,11 @@ const CONFIG = {
   port: 19148,
   username: 'Chacha ninggolan',
   offline: false,
-    version: '1.26.20',
+  version: '1.26.20',
 }
 
 const RECONNECT_DELAY_MS = 5000
 const MOVE_INTERVAL_MS = 25000
-
 let client = null
 let moveTimer = null
 let reconnectTimer = null
@@ -28,13 +27,8 @@ function stopMovement() {
 function startAntiAFK() {
   stopMovement()
   let step = 0
-  const directions = [
-    { x: 0.3, z: 0 }, { x: 0, z: 0.3 },
-    { x: -0.3, z: 0 }, { x: 0, z: -0.3 },
-  ]
   moveTimer = setInterval(() => {
     if (!client || !isConnected) return
-    const dir = directions[step % directions.length]
     step++
     try {
       client.write('player_action', {
@@ -51,18 +45,17 @@ function connect() {
   if (reconnectTimer) { clearTimeout(reconnectTimer); reconnectTimer = null }
   log(`Menghubungkan ke ${CONFIG.host}:${CONFIG.port} sebagai "${CONFIG.username}"...`)
   try { client = bedrock.createClient(CONFIG) }
-  catch (err) { log(`Gagal buat client: ${err.message}`); scheduleReconnect(); return }
+  catch (err) { log(`Gagal: ${err.message}`); scheduleReconnect(); return }
 
   client.on('spawn', () => {
     isConnected = true
     log('✅ Bot berhasil masuk ke server!')
-    log('🔄 Anti-AFK aktif')
     startAntiAFK()
   })
-  client.on('text', (p) => log(`💬 Chat: ${p.message || ''}`))
+  client.on('text', (p) => log(`💬 ${p.message || ''}`))
   client.on('disconnect', (r) => {
     isConnected = false; stopMovement()
-    log(`⚠️ Terputus: ${JSON.stringify(r)}`); scheduleReconnect()
+    log(`⚠️ Disconnect: ${JSON.stringify(r)}`); scheduleReconnect()
   })
   client.on('error', (err) => {
     isConnected = false; stopMovement()
@@ -70,7 +63,7 @@ function connect() {
   })
   client.on('close', () => {
     isConnected = false; stopMovement()
-    log('🔌 Koneksi ditutup'); scheduleReconnect()
+    log('🔌 Tutup'); scheduleReconnect()
   })
 }
 
@@ -80,10 +73,8 @@ function scheduleReconnect() {
   reconnectTimer = setTimeout(() => { reconnectTimer = null; connect() }, RECONNECT_DELAY_MS)
 }
 
-process.on('SIGINT', () => { log('Bot dihentikan.'); stopMovement(); if (client) client.close(); process.exit(0) })
+process.on('SIGINT', () => { stopMovement(); if (client) client.close(); process.exit(0) })
 process.on('uncaughtException', (err) => { log(`Exception: ${err.message}`); scheduleReconnect() })
-process.on('unhandledRejection', (r) => { log(`Rejection: ${r}`) })
 
-log('=== Bot Chacha Ninggolan ===')
-log(`Server: ${CONFIG.host}:${CONFIG.port}`)
+log('=== Bot Chacha Ninggolan | versi 1.26.20 ===')
 connect()
