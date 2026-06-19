@@ -4,7 +4,7 @@ const CONFIG = {
   host: 'pengangguran.aternos.me',
   port: 19148,
   username: 'Chacha ninggolan',
-  offline: false,
+  offline: true,
   version: '1.26.20',
 }
 
