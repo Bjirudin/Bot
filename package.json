@@ -1,0 +1,12 @@
+{
+  "name": "minecraft-bot-chacha",
+  "version": "1.0.0",
+  "description": "Bot Minecraft Bedrock - Chacha Ninggolan",
+  "main": "bot.js",
+  "scripts": {
+    "start": "node bot.js"
+  },
+  "dependencies": {
+    "bedrock-protocol": "^3.41.0"
+  }
+}
